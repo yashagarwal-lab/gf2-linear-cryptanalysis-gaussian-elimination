@@ -96,7 +96,9 @@ for i in range(64):
     M_rows.append(row)
 
 missions = []
-with open("sealed_missions.txt", "r") as f:
+import os
+txt_f = "data/sealed_missions.txt" if os.path.exists("data/sealed_missions.txt") else "sealed_missions.txt"
+with open(txt_f, "r") as f:
     for line in f:
         line = line.strip()
         if not line or line.startswith("#"): continue
