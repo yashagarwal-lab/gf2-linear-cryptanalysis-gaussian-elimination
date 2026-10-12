@@ -43,7 +43,7 @@ $$P(x) = x^{64} + x^4 + x^3 + x + 1$$
 
 Multiplication of field elements $A(x) \cdot B(x) \pmod{P(x)}$ is performed via carryless shift-and-XOR operations:
 
-$$a \otimes b = \bigoplus_{i=0}^{63} \left( a \cdot (b \gg i \mathbin{\&} 1) \cdot x^i \pmod{P(x)} \right)$$
+$$a \otimes b = \bigoplus_{i=0}^{63} \left( a \cdot (b \gg i \wedge 1) \cdot x^i \pmod{P(x)} \right)$$
 
 ### 3.2 The Flaw: Strict Linearity over $\text{GF}(2)$
 
@@ -101,7 +101,7 @@ $$\text{Total Equations} = 5 \times 24 = 120 \text{ linear binary equations}$$
 
 $$\text{Total Unknowns} = 64 \text{ key bits}$$
 
-Because $120 > 64$, the linear system is **overdetermined**.
+Because $120 \gt 64$, the linear system is **overdetermined**.
 
 ### 3.6 Gaussian Elimination over $\text{GF}(2)$
 
