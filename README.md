@@ -43,7 +43,7 @@ $$P(x) = x^{64} + x^4 + x^3 + x + 1$$
 
 Multiplication of field elements $A(x) \cdot B(x) \pmod{P(x)}$ is performed via carryless shift-and-XOR operations:
 
-$$\text{gf\_mul}(a, b) = \bigoplus_{i=0}^{63} \left( a \cdot (b \gg i \mathbin{\&} 1) \cdot x^i \pmod{P(x)} \right)$$
+$$a \otimes b = \bigoplus_{i=0}^{63} \left( a \cdot (b \gg i \mathbin{\&} 1) \cdot x^i \pmod{P(x)} \right)$$
 
 ### 3.2 The Flaw: Strict Linearity over $\text{GF}(2)$
 
@@ -53,12 +53,12 @@ $$f(\mathbf{x} \oplus \mathbf{y}) = f(\mathbf{x}) \oplus f(\mathbf{y}) \quad \fo
 
 We examine every primitive operation inside the seal's round function:
 
-1. **Bitwise Circular Rotation ($\text{rotl}(x, n)$)**:
-   $$\text{rotl}(\mathbf{x} \oplus \mathbf{y}, n) = \text{rotl}(\mathbf{x}, n) \oplus \text{rotl}(\mathbf{y}, n)$$
+1. **Bitwise Circular Rotation (`rotl(x, n)`):**
+   $$\operatorname{rotl}(\mathbf{x} \oplus \mathbf{y}, n) = \operatorname{rotl}(\mathbf{x}, n) \oplus \operatorname{rotl}(\mathbf{y}, n)$$
    $\implies$ Pure permutation matrix over $\mathbb{F}_2$. Linear.
 2. **Bitwise XOR ($\oplus$)**:
    The native addition operation in $\mathbb{F}_2$. Linear.
-3. **Galois Field Multiplication by Constant $C$ ($\text{gf\_mul}(x, C)$)**:
+3. **Galois Field Multiplication by Constant $C$ (`gf_mul(x, C)`):**
    Because polynomial multiplication distributes over addition:
    $$C \cdot (\mathbf{x} \oplus \mathbf{y}) \equiv (C \cdot \mathbf{x}) \oplus (C \cdot \mathbf{y}) \pmod{P(x)}$$
    $\implies$ Exactly linear over $\mathbb{F}_2$.
@@ -81,9 +81,9 @@ For a mission file containing $N$ bytes $m_1, m_2, \dots, m_N$, the composition 
 
 $$\mathbf{s}_N = \mathbf{K} \cdot \mathbf{M}^N \oplus \sum_{j=1}^N \mathbf{c}(m_j) \cdot \mathbf{M}^{N-j}$$
 
-$$\mathbf{s}_N = \mathbf{K} \cdot \mathbf{M}^N \oplus \mathbf{v}_{\text{msg}}$$
+$$\mathbf{s}_N = \mathbf{K} \cdot \mathbf{M}^N \oplus \mathbf{v}_{\mathrm{msg}}$$
 
-where $\mathbf{K}$ is the unknown 64-bit key vector, and $\mathbf{v}_{\text{msg}}$ is a known constant vector completely determined by the known mission text.
+where $\mathbf{K}$ is the unknown 64-bit key vector, and $\mathbf{v}_{\mathrm{msg}}$ is a known constant vector completely determined by the known mission text.
 
 ### 3.5 Constructing the Linear Equation System
 
@@ -93,7 +93,7 @@ $$\text{Seal}_i = \mathbf{s}_{N, i}[40..63] \quad (24 \text{ observed bits per m
 
 For each observed bit $j \in \{0, 1, \dots, 23\}$:
 
-$$\bigoplus_{k=0}^{63} \left( K_k \cdot \left(\mathbf{M}^{N_i}\right)_{k, 40+j} \right) = \text{Seal}_{i, j} \oplus \left(\mathbf{v}_{\text{msg}, i}\right)_{40+j}$$
+$$\bigoplus_{k=0}^{63} \left( K_k \cdot \left(\mathbf{M}^{N_i}\right)_{k, 40+j} \right) = \text{Seal}_{i, j} \oplus \left(\mathbf{v}_{\mathrm{msg}, i}\right)_{40+j}$$
 
 With 5 intercepted missions:
 
@@ -121,9 +121,9 @@ We construct the augmented binary matrix $[\mathbf{A} \mid \mathbf{b}]$ of size 
 2. **Matrix Powering**:
    - Compute $\mathbf{M}^N$ over $\mathbb{F}_2$ using repeated binary squaring in $\mathcal{O}(64^3 \log N)$ steps.
 3. **Affine Offset Accumulation**:
-   - Propagate message bytes to compute constant offset vector $\mathbf{v}_{\text{msg}}$.
+   - Propagate message bytes to compute constant offset vector $\mathbf{v}_{\mathrm{msg}}$.
 4. **Equation Aggregation**:
-   - Slice top 24 bits of $\mathbf{M}^N$ and $\mathbf{v}_{\text{msg}}$ for each of the 5 missions.
+   - Slice top 24 bits of $\mathbf{M}^N$ and $\mathbf{v}_{\mathrm{msg}}$ for each of the 5 missions.
    - Stack into a $120 \times 64$ coefficient matrix $\mathbf{A}$ and $120 \times 1$ target vector $\mathbf{b}$.
 5. **Gaussian Elimination**:
    - Execute row reduction modulo 2.
